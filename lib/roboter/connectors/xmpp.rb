@@ -1,4 +1,5 @@
 require 'blather/client/client'
+require 'roboter/events'
 
 module Roboter
   module Connectors
@@ -14,6 +15,7 @@ module Roboter
         @pass = options[:pass]
         @host = options[:host]
         @port = options[:port]
+        @router = options[:router]
       end
 
       def start
@@ -22,7 +24,10 @@ module Roboter
         # Remove initial error handler.
         @client.clear_handlers(:error)
 
-        @client.register_handler(:disconnected, method(:handle_disconnect))
+        @client.register_handler(:ready) { handle_ready }
+        @client.register_handler(:message) {|m| handle_message(m) }
+        @client.register_handler(:error) {|e| handle_error(e) }
+        @client.register_handler(:disconnected) { handle_disconnect }
 
         @client.run
 
@@ -44,7 +49,21 @@ module Roboter
       end
 
       private
+      def handle_ready
+        @router.trigger(Events::Connect.new)
+      end
+
+      def handle_message(message)
+        @router.trigger(Events::Message.new(message))
+      end
+
+      def handle_error(error)
+        @router.trigger(Events::Error.new(error))
+      end
+
       def handle_disconnect
+        @router.trigger(Events::Disconnect.new)
+
         true # Return true to avoid stopping the event loop.
       end
     end

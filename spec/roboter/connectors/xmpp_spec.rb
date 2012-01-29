@@ -1,8 +1,10 @@
 require 'spec_helper'
 require 'roboter/connectors/xmpp'
+require 'blather_client_stub'
 
 describe Roboter::Connectors::XMPP do
-  let(:blather) { double('Blather::Client').as_null_object }
+  let(:blather) { BlatherClientStub.new }
+  let(:router) { double('EventRouter').as_null_object }
 
   let(:options) do
     {
@@ -10,7 +12,8 @@ describe Roboter::Connectors::XMPP do
       :nick => 'robot',
       :pass => '1234',
       :host => 'xmpp.example.com',
-      :port => 5222
+      :port => 5222,
+      :router => router
     }
   end
 
@@ -37,13 +40,6 @@ describe Roboter::Connectors::XMPP do
 
     it "removes the initial error handler" do
       blather.should_receive(:clear_handlers).with(:error)
-      xmpp.start
-    end
-
-    it "adds a disconnect handler that returns true" do
-      blather.should_receive(:register_handler).with do |name, method|
-        name == :disconnected and method.call == true
-      end
       xmpp.start
     end
 
@@ -97,6 +93,61 @@ describe Roboter::Connectors::XMPP do
     it "calls run on the Blather::Client" do
       blather.should_receive(:run)
       xmpp.reconnect
+    end
+  end
+
+  describe "connect event handling" do
+    describe "ready event" do
+      it "triggers a ready event on the router" do
+        connect = double('ConnectEvent')
+
+        Roboter::Events::Connect.stub(:new).and_return(connect)
+        router.should_receive(:trigger).with(connect)
+
+        xmpp.start
+        blather.trigger_ready
+      end
+    end
+
+    describe "message event" do
+      it "triggers a message event on the router" do
+        message = double('MessageEvent')
+
+        Roboter::Events::Message.stub(:new).with('Hallo').and_return(message)
+        router.should_receive(:trigger).with(message)
+
+        xmpp.start
+        blather.trigger_message('Hallo')
+      end
+    end
+
+    describe "error event" do
+      it "triggers an error event on the router" do
+        error = double('ErrorEvent')
+
+        Roboter::Events::Error.stub(:new).with('ERROR').and_return(error)
+        router.should_receive(:trigger).with(error)
+
+        xmpp.start
+        blather.trigger_error('ERROR')
+      end
+    end
+
+    describe "disconnect event" do
+      it "triggers a disconnect event on the router" do
+        disconnect = double('DisconnectEvent')
+
+        Roboter::Events::Disconnect.stub(:new).and_return(disconnect)
+        router.should_receive(:trigger).with(disconnect)
+
+        xmpp.start
+        blather.trigger_disconnect
+      end
+
+      it "executes a handler that returns true" do
+        xmpp.start
+        blather.trigger_disconnect.should == [true]
+      end
     end
   end
 end

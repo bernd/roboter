@@ -26,20 +26,20 @@ module Roboter
 
         @client.run
 
-        EM.add_periodic_timer(@keepalive, method(:keepalive!))
+        EM.add_periodic_timer(@keepalive, method(:keepalive))
       end
 
       def stop
         @client.close
       end
 
-      def keepalive!
-        @client.connected? ? @client.write(' ') : reconnect!
+      def keepalive
+        @client.connected? ? @client.write(' ') : reconnect
       rescue
-        reconnect!
+        reconnect
       end
 
-      def reconnect!
+      def reconnect
         @client.run
       end
 

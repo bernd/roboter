@@ -54,7 +54,7 @@ describe Roboter::Connectors::XMPP do
 
     it "sets up a keep-alive timer (5 sec)" do
       EM.should_receive(:add_periodic_timer).with do |number, method|
-        number == 5 and method.name == :keepalive!
+        number == 5 and method.name == :keepalive
       end
       xmpp.start
     end
@@ -67,36 +67,36 @@ describe Roboter::Connectors::XMPP do
     end
   end
 
-  describe "#keepalive!" do
+  describe "#keepalive" do
     context "client connected" do
       it "will write an empty string to the client" do
         blather.stub(:connected?).and_return(true)
         blather.should_receive(:write).with(' ')
-        xmpp.keepalive!
+        xmpp.keepalive
       end
     end
 
     context "client disconnected" do
       it "calls the reconnect handler" do
         blather.stub(:connected?).and_return(false)
-        xmpp.should_receive(:reconnect!)
-        xmpp.keepalive!
+        xmpp.should_receive(:reconnect)
+        xmpp.keepalive
       end
     end
 
     context "with exception raised" do
       it "calls the reconnect handler" do
         blather.stub(:connected?).and_raise(RuntimeError)
-        xmpp.should_receive(:reconnect!)
-        xmpp.keepalive!
+        xmpp.should_receive(:reconnect)
+        xmpp.keepalive
       end
     end
   end
 
-  describe "#reconnect!" do
+  describe "#reconnect" do
     it "calls run on the Blather::Client" do
       blather.should_receive(:run)
-      xmpp.reconnect!
+      xmpp.reconnect
     end
   end
 end

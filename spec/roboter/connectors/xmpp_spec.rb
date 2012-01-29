@@ -4,7 +4,7 @@ require 'blather_client_stub'
 
 describe Roboter::Connectors::XMPP do
   let(:blather) { BlatherClientStub.new }
-  let(:router) { double('EventRouter').as_null_object }
+  let(:gate) { double('EventGate').as_null_object }
 
   let(:options) do
     {
@@ -13,7 +13,7 @@ describe Roboter::Connectors::XMPP do
       :pass => '1234',
       :host => 'xmpp.example.com',
       :port => 5222,
-      :router => router
+      :event_gate => gate
     }
   end
 
@@ -98,11 +98,11 @@ describe Roboter::Connectors::XMPP do
 
   describe "connect event handling" do
     describe "ready event" do
-      it "triggers a ready event on the router" do
+      it "triggers a ready event on the gate" do
         connect = double('ConnectEvent')
 
         Roboter::Events::Connect.stub(:new).and_return(connect)
-        router.should_receive(:trigger).with(connect)
+        gate.should_receive(:trigger).with(connect)
 
         xmpp.start
         blather.trigger_ready
@@ -110,11 +110,11 @@ describe Roboter::Connectors::XMPP do
     end
 
     describe "message event" do
-      it "triggers a message event on the router" do
+      it "triggers a message event on the gate" do
         message = double('MessageEvent')
 
         Roboter::Events::Message.stub(:new).with('Hallo').and_return(message)
-        router.should_receive(:trigger).with(message)
+        gate.should_receive(:trigger).with(message)
 
         xmpp.start
         blather.trigger_message('Hallo')
@@ -122,11 +122,11 @@ describe Roboter::Connectors::XMPP do
     end
 
     describe "error event" do
-      it "triggers an error event on the router" do
+      it "triggers an error event on the gate" do
         error = double('ErrorEvent')
 
         Roboter::Events::Error.stub(:new).with('ERROR').and_return(error)
-        router.should_receive(:trigger).with(error)
+        gate.should_receive(:trigger).with(error)
 
         xmpp.start
         blather.trigger_error('ERROR')
@@ -134,11 +134,11 @@ describe Roboter::Connectors::XMPP do
     end
 
     describe "disconnect event" do
-      it "triggers a disconnect event on the router" do
+      it "triggers a disconnect event on the gate" do
         disconnect = double('DisconnectEvent')
 
         Roboter::Events::Disconnect.stub(:new).and_return(disconnect)
-        router.should_receive(:trigger).with(disconnect)
+        gate.should_receive(:trigger).with(disconnect)
 
         xmpp.start
         blather.trigger_disconnect

@@ -15,7 +15,7 @@ module Roboter
         @pass = options[:pass]
         @host = options[:host]
         @port = options[:port]
-        @router = options[:router]
+        @event_gate = options[:event_gate]
       end
 
       def start
@@ -50,19 +50,19 @@ module Roboter
 
       private
       def handle_ready
-        @router.trigger(Events::Connect.new)
+        @event_gate.trigger(Events::Connect.new)
       end
 
       def handle_message(message)
-        @router.trigger(Events::Message.new(message))
+        @event_gate.trigger(Events::Message.new(message))
       end
 
       def handle_error(error)
-        @router.trigger(Events::Error.new(error))
+        @event_gate.trigger(Events::Error.new(error))
       end
 
       def handle_disconnect
-        @router.trigger(Events::Disconnect.new)
+        @event_gate.trigger(Events::Disconnect.new)
 
         true # Return true to avoid stopping the event loop.
       end

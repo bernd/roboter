@@ -4,8 +4,6 @@ require 'roboter/events'
 module Roboter
   module Connectors
     class XMPP
-      attr_reader :client
-
       def initialize(options = {})
         @client = Blather::Client.new
         @keepalive = 5

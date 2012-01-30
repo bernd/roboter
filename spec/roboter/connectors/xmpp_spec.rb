@@ -73,26 +73,11 @@ describe Roboter::Connectors::XMPP do
     end
 
     context "client disconnected" do
-      it "calls the reconnect handler" do
+      it "does not write the keep-alive packet" do
         blather.stub(:connected?).and_return(false)
-        xmpp.should_receive(:reconnect)
+        blather.should_not_receive(:write)
         xmpp.keepalive
       end
-    end
-
-    context "with exception raised" do
-      it "calls the reconnect handler" do
-        blather.stub(:connected?).and_raise(RuntimeError)
-        xmpp.should_receive(:reconnect)
-        xmpp.keepalive
-      end
-    end
-  end
-
-  describe "#reconnect" do
-    it "calls run on the Blather::Client" do
-      blather.should_receive(:run)
-      xmpp.reconnect
     end
   end
 

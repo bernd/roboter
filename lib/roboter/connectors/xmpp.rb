@@ -39,13 +39,7 @@ module Roboter
       end
 
       def keepalive
-        @client.connected? ? @client.write(' ') : reconnect
-      rescue
-        reconnect
-      end
-
-      def reconnect
-        @client.run
+        @client.write(' ') if @client.connected?
       end
 
       private

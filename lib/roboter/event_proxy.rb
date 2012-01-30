@@ -1,7 +1,7 @@
 require 'roboter/events'
 
 module Roboter
-  class EventGate
+  class EventProxy
     def initialize
       @handler = Hash.new {|hash, key| hash[key] = []}
     end

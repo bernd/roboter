@@ -4,7 +4,7 @@ require 'blather_client_stub'
 
 describe Roboter::Connectors::XMPP do
   let(:blather) { BlatherClientStub.new }
-  let(:gate) { double('EventGate').as_null_object }
+  let(:proxy) { double('EventProxy').as_null_object }
 
   let(:options) do
     {
@@ -13,7 +13,7 @@ describe Roboter::Connectors::XMPP do
       :pass => '1234',
       :host => 'xmpp.example.com',
       :port => 5222,
-      :event_gate => gate
+      :event_proxy => proxy
     }
   end
 
@@ -98,11 +98,11 @@ describe Roboter::Connectors::XMPP do
 
   describe "connect event handling" do
     describe "ready event" do
-      it "triggers a ready event on the gate" do
+      it "triggers a ready event on the proxy" do
         connect = double('ConnectEvent')
 
         Roboter::Events::Connect.stub(:new).and_return(connect)
-        gate.should_receive(:trigger).with(connect)
+        proxy.should_receive(:trigger).with(connect)
 
         xmpp.start
         blather.trigger_ready
@@ -110,11 +110,11 @@ describe Roboter::Connectors::XMPP do
     end
 
     describe "message event" do
-      it "triggers a message event on the gate" do
+      it "triggers a message event on the proxy" do
         message = double('MessageEvent')
 
         Roboter::Events::Message.stub(:new).with('Hallo').and_return(message)
-        gate.should_receive(:trigger).with(message)
+        proxy.should_receive(:trigger).with(message)
 
         xmpp.start
         blather.trigger_message('Hallo')
@@ -122,11 +122,11 @@ describe Roboter::Connectors::XMPP do
     end
 
     describe "error event" do
-      it "triggers an error event on the gate" do
+      it "triggers an error event on the proxy" do
         error = double('ErrorEvent')
 
         Roboter::Events::Error.stub(:new).with('ERROR').and_return(error)
-        gate.should_receive(:trigger).with(error)
+        proxy.should_receive(:trigger).with(error)
 
         xmpp.start
         blather.trigger_error('ERROR')
@@ -134,11 +134,11 @@ describe Roboter::Connectors::XMPP do
     end
 
     describe "disconnect event" do
-      it "triggers a disconnect event on the gate" do
+      it "triggers a disconnect event on the proxy" do
         disconnect = double('DisconnectEvent')
 
         Roboter::Events::Disconnect.stub(:new).and_return(disconnect)
-        gate.should_receive(:trigger).with(disconnect)
+        proxy.should_receive(:trigger).with(disconnect)
 
         xmpp.start
         blather.trigger_disconnect
